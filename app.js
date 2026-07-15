@@ -1,34 +1,25 @@
-// ضع رابط الـ Web App الخاص بك من Apps Script هنا
-const API_URL = "https://script.google.com/macros/s/AKfycbwnMz4LLHrf_6ypAXkrAtdPa8W5G-tUGftVWlmryEKqa3mISRxe3ywuIwbZDXFz7eSdwA/exec";
+// ضع رابط الـ Web App الخاص بك من Apps Script هنا داخل علامتي التنصيص
+const API_URL = "https://script.google.com/macros/s/AKfycbwmsa7NnM86XDqnxe5H7kkxC2reymdo8pA0zyLyKIbFG646lSRHfD839P6SR2p-m6v-VA/exec";
 
-// تسجيل Service Worker لتحويل الموقع لتطبيق (PWA)
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js')
     .then(() => console.log("تم تفعيل PWA بنجاح"));
 }
 
-// دالة مساعدة لتحويل رابط جوجل درايف إلى رابط تحميل مباشر
-function getDirectDownloadLink(url) {
-  // استخراج ID الملف من الرابط الافتراضي
-  const match = url.match(/\/d\/(.+?)\//);
-  if (match && match[1]) {
-    const fileId = match[1];
-    return `https://drive.google.com/uc?export=download&id=${fileId}`;
-  }
-  return url; // إرجاع الرابط الأصلي في حال عدم التطابق
-}
-
 document.getElementById('searchBtn').addEventListener('click', () => {
-  const code = document.getElementById('patientCode').value;
+  const code = document.getElementById('patientCode').value.trim();
+  const phone = document.getElementById('patientPhone').value.trim();
   const resultBox = document.getElementById('resultBox');
   const loading = document.getElementById('loading');
 
-  if(code.trim() === "") return alert("يرجى إدخال كود المريض.");
+  if(!code || !phone) return alert("يرجى إدخال كود المريض ورقم الهاتف.");
 
   loading.style.display = 'block';
   resultBox.style.display = 'none';
 
-  fetch(API_URL + "?code=" + encodeURIComponent(code))
+  const requestUrl = `${API_URL}?code=${encodeURIComponent(code)}&phone=${encodeURIComponent(phone)}`;
+
+  fetch(requestUrl)
     .then(response => response.json())
     .then(data => {
       loading.style.display = 'none';
@@ -36,7 +27,7 @@ document.getElementById('searchBtn').addEventListener('click', () => {
       
       if (!data.found) {
         resultBox.className = 'error';
-        resultBox.innerHTML = "⚠️ لم نتمكن من العثور على هذا الكود.";
+        resultBox.innerHTML = "⚠️ البيانات غير صحيحة أو غير موجودة.";
       } else if (!data.isReady) {
         resultBox.className = 'pending';
         resultBox.innerHTML = `مرحباً <b>${data.name}</b><br><br>⏳ نتيجتك قيد الانتظار ولم تجهز بعد.`;
@@ -44,17 +35,26 @@ document.getElementById('searchBtn').addEventListener('click', () => {
         resultBox.className = 'success';
         let html = `مرحباً <b>${data.name}</b> 💐<br><br><b>النتيجة:</b> ${data.resultText}<br>`;
         
-        // استخدام دالة التحميل المباشر هنا
         if (data.fileUrl && data.fileUrl.trim() !== "") {
-          const directLink = getDirectDownloadLink(data.fileUrl);
-          html += `<a href="${directLink}" class="btn-download" target="_blank">📥 تحميل التقرير (PDF)</a>`;
+          const idMatch = data.fileUrl.match(/[-\w]{25,}/);
+          if (idMatch) {
+            const fileId = idMatch[0];
+            const previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+            const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+            
+            html += `<div class="buttons-container">
+                       <a href="${previewUrl}" class="btn-action btn-view" target="_blank">👁️ معاينة</a>
+                       <a href="${downloadUrl}" class="btn-action btn-download">📥 تحميل</a>
+                     </div>`;
+          }
         }
-        
         resultBox.innerHTML = html;
       }
     })
     .catch(error => {
       loading.style.display = 'none';
-      alert("خطأ في الاتصال. تأكد من الإنترنت.");
+      resultBox.style.display = 'block';
+      resultBox.className = 'error';
+      resultBox.innerHTML = "⚠️ خطأ في الاتصال. تأكد من الإنترنت.";
     });
 });
