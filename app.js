@@ -1,5 +1,5 @@
 // ضع رابط الـ Web App الخاص بك من Apps Script هنا داخل علامتي التنصيص
-const API_URL = "https://script.google.com/macros/s/AKfycbwmsa7NnM86XDqnxe5H7kkxC2reymdo8pA0zyLyKIbFG646lSRHfD839P6SR2p-m6v-VA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyN8-jqQbhDLKoyMYoGbRwBC1qwGCPuLNFCcHzHNciK6KhzL4audxYVpq64yid-kmln7Q/exec";
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js')
