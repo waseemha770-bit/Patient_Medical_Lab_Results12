@@ -7,6 +7,17 @@ if ('serviceWorker' in navigator) {
     .then(() => console.log("تم تفعيل PWA بنجاح"));
 }
 
+// دالة مساعدة لتحويل رابط جوجل درايف إلى رابط تحميل مباشر
+function getDirectDownloadLink(url) {
+  // استخراج ID الملف من الرابط الافتراضي
+  const match = url.match(/\/d\/(.+?)\//);
+  if (match && match[1]) {
+    const fileId = match[1];
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
+  }
+  return url; // إرجاع الرابط الأصلي في حال عدم التطابق
+}
+
 document.getElementById('searchBtn').addEventListener('click', () => {
   const code = document.getElementById('patientCode').value;
   const resultBox = document.getElementById('resultBox');
@@ -32,9 +43,13 @@ document.getElementById('searchBtn').addEventListener('click', () => {
       } else {
         resultBox.className = 'success';
         let html = `مرحباً <b>${data.name}</b> 💐<br><br><b>النتيجة:</b> ${data.resultText}<br>`;
+        
+        // استخدام دالة التحميل المباشر هنا
         if (data.fileUrl && data.fileUrl.trim() !== "") {
-          html += `<a href="${data.fileUrl}" class="btn-download" target="_blank">📥 تحميل التقرير (PDF)</a>`;
+          const directLink = getDirectDownloadLink(data.fileUrl);
+          html += `<a href="${directLink}" class="btn-download" target="_blank">📥 تحميل التقرير (PDF)</a>`;
         }
+        
         resultBox.innerHTML = html;
       }
     })
