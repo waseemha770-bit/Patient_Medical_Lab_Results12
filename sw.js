@@ -1,8 +1,10 @@
-const CACHE_NAME = 'medical-pwa-v1';
+const CACHE_NAME = 'medical-pwa-v2';
 const FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
-  './app.js'
+  './app.js',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
