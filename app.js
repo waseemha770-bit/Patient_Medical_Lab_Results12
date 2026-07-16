@@ -1,5 +1,4 @@
-// ضع رابط الـ Web App الخاص بك من Apps Script هنا داخل علامتي التنصيص
-const API_URL = "https://script.google.com/macros/s/AKfycbxmRRVtI3srvNUtBIDgAqLFMQhKpnv3q_gnrGcEgOSj5Fq2lR_kAVUGNKCD7EeckVbdrQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbweyth6uks-3x2i6D_68QSxGHtNYBeKGyisKnJmYW9k_KqHjH_M_n6Z154c6VInNu05XA/exec"; // تذكر وضع الرابط الجديد بعد النشر
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js')
@@ -9,6 +8,7 @@ if ('serviceWorker' in navigator) {
 document.getElementById('searchBtn').addEventListener('click', () => {
   const code = document.getElementById('patientCode').value.trim();
   const phone = document.getElementById('patientPhone').value.trim();
+  const dept = document.getElementById('department').value; // جلب القسم المختار
   const resultBox = document.getElementById('resultBox');
   const loading = document.getElementById('loading');
 
@@ -17,7 +17,8 @@ document.getElementById('searchBtn').addEventListener('click', () => {
   loading.style.display = 'block';
   resultBox.style.display = 'none';
 
-  const requestUrl = `${API_URL}?code=${encodeURIComponent(code)}&phone=${encodeURIComponent(phone)}`;
+  // إضافة القسم (dept) إلى الرابط
+  const requestUrl = `${API_URL}?code=${encodeURIComponent(code)}&phone=${encodeURIComponent(phone)}&dept=${encodeURIComponent(dept)}`;
 
   fetch(requestUrl)
     .then(response => response.json())
@@ -27,10 +28,10 @@ document.getElementById('searchBtn').addEventListener('click', () => {
       
       if (!data.found) {
         resultBox.className = 'error';
-        resultBox.innerHTML = "⚠️ البيانات غير صحيحة أو غير موجودة.";
+        resultBox.innerHTML = "⚠️ البيانات غير صحيحة أو النتيجة غير متوفرة في هذا القسم.";
       } else if (!data.isReady) {
         resultBox.className = 'pending';
-        resultBox.innerHTML = `مرحباً <b>${data.name}</b><br><br>⏳ نتيجتك قيد الانتظار ولم تجهز بعد.`;
+        resultBox.innerHTML = `مرحباً <b>${data.name}</b><br><br>⏳ نتيجتك قيد الانتظار في القسم ولم تجهز بعد.`;
       } else {
         resultBox.className = 'success';
         let html = `مرحباً <b>${data.name}</b> 💐<br><br><b>النتيجة:</b> ${data.resultText}<br>`;
