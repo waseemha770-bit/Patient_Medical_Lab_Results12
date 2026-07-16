@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medical-pwa-v3';
+const CACHE_NAME = 'medical-pwa-v4';
 const FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
